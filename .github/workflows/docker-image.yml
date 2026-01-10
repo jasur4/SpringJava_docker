@@ -61,14 +61,15 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-
+          env:
+            GHCR_PAT: ${{ secrets.GHCR_PAT }}
           script: |
             IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1:latest
 
             # Логин в GHCR через PAT
-            docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GHCR_PAT }}
+            docker login ghcr.io -u ${{ github.repository_owner }} -p "$GHCR_PAT"
 
-            # Удаляем все контейнеры, которые используют порт 8080
+            # Удаляем все контейнеры на порту 8080
             PORT_CONFLICT=$(docker ps -q --filter "publish=8080")
             if [ -n "$PORT_CONFLICT" ]; then
               echo "Stopping containers on port 8080: $PORT_CONFLICT"
@@ -76,24 +77,24 @@ jobs:
               docker rm $PORT_CONFLICT
             fi
 
-            # Останавливаем и удаляем контейнер spring-app, если он остался
+            # Удаляем контейнер spring-app, если есть
             if docker ps -a --format '{{.Names}}' | grep -Eq "^spring-app\$"; then
               echo "Removing old container spring-app"
               docker stop spring-app || true
               docker rm spring-app || true
             fi
 
-            # Удаляем локальный образ, чтобы pull точно подтянул свежий
+            # Удаляем старый локальный образ
             if docker images -q $IMAGE_NAME; then
               echo "Removing old image $IMAGE_NAME"
               docker rmi $IMAGE_NAME || true
             fi
 
-            # Пуллим новый образ
+            # Пуллим свежий образ
             echo "Pulling image $IMAGE_NAME"
             docker pull $IMAGE_NAME
 
-            # Запускаем контейнер
+            # Запускаем новый контейнер
             echo "Running new container spring-app"
             docker run -d \
               --name spring-app \
