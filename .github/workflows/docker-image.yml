@@ -64,8 +64,12 @@ jobs:
           script: |
             IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1:latest
 
-            # Логинимся в GHCR на сервере (если нужен приватный доступ)
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Удаляем все контейнеры на порту 8080
+            PORT_CONFLICT=$(docker ps -q --filter "publish=8080")
+            if [ -n "$PORT_CONFLICT" ]; then
+              docker stop $PORT_CONFLICT
+              docker rm $PORT_CONFLICT
+            fi
 
             # Останавливаем и удаляем старый контейнер
             docker stop spring-app || true
