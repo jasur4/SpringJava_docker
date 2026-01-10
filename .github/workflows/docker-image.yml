@@ -43,11 +43,11 @@ jobs:
 
       # Шаг 6: Сборка Docker образа
       - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:latest .
+        run: docker build -t $IMAGE_NAME .
 
       # Шаг 7: Пуш Docker образа
       - name: Push Docker image
-        run: docker push $IMAGE_NAME:latest
+        run: docker push $IMAGE_NAME
 
   deploy:
     name: Deploy to Server
@@ -62,7 +62,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1:latest
+            IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1
 
             # Удаляем все контейнеры на порту 8080
             PORT_CONFLICT=$(docker ps -q --filter "publish=8080")
