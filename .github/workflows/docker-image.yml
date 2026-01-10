@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/spring_sample1
+  IMAGE_NAME: ghcr.io/jasur4/spring_sample1
 
 jobs:
   build-and-test:
@@ -62,7 +62,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1:latest
+            IMAGE_NAME=ghcr.io/jasur4/spring_sample1:latest
 
             # Логинимся в GHCR на сервере (если нужен приватный доступ)
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
