@@ -65,8 +65,8 @@ jobs:
           script: |
             IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1:latest
 
-            # Логин в GHCR (даже для public пакета, безопасно)
-            docker login ghcr.io -u ${{ github.repository_owner }} -p ""
+            # Логин в GHCR через PAT
+            docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GHCR_PAT }}
 
             # Удаляем все контейнеры, которые используют порт 8080
             PORT_CONFLICT=$(docker ps -q --filter "publish=8080")
