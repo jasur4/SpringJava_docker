@@ -49,19 +49,8 @@ jobs:
           script: |
             IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/java-docker:latest
 
-            # Удаляем все контейнеры на порту 8080
-            PORT_CONFLICT=$(docker ps -q --filter "publish=8080")
-            if [ -n "$PORT_CONFLICT" ]; then
-              docker stop $PORT_CONFLICT
-              docker rm $PORT_CONFLICT
-            fi
-
-            # Удаляем контейнер с именем java-app, если он остался
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
             docker stop java-app || true
             docker rm java-app || true
-
-            # Пуллим новый образ
             docker pull $IMAGE_NAME
-
-            # Запускаем контейнер
             docker run -d --name java-app -p 8080:8080 $IMAGE_NAME
