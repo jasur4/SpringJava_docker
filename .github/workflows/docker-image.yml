@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/java_docker
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/java-docker
 
 jobs:
   build-and-test:
