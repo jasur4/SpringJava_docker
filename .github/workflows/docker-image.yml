@@ -1,4 +1,4 @@
-name: Java Spring CI/CD Pipeline
+name: Java CI/CD Pipeline
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/spring_sample1
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/java_docker
 
 jobs:
   build-and-test:
@@ -18,22 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Шаг 2: Устанавливаем Java и Maven
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
-
-      # Шаг 3: Сборка проекта Maven
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
-
-      # Шаг 4: Запуск тестов Maven
-      - name: Run Tests
-        run: mvn test
-
-      # Шаг 5: Логин в GitHub Container Registry
+      # Шаг 2: Логин в GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -41,11 +26,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Шаг 6: Сборка Docker образа
+      # Шаг 3: Сборка Docker образа
       - name: Build Docker image
         run: docker build -t $IMAGE_NAME:latest .
 
-      # Шаг 7: Пуш Docker образа
+      # Шаг 4: Пуш Docker образа
       - name: Push Docker image
         run: docker push $IMAGE_NAME:latest
 
@@ -61,42 +46,22 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          env:
-            GHCR_PAT: ${{ secrets.GHCR_PAT }}
           script: |
-            IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/spring_sample1:latest
-
-            # Логин в GHCR через PAT
-            docker login ghcr.io -u ${{ github.repository_owner }} -p "$GHCR_PAT"
+            IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/java-docker:latest
 
             # Удаляем все контейнеры на порту 8080
             PORT_CONFLICT=$(docker ps -q --filter "publish=8080")
             if [ -n "$PORT_CONFLICT" ]; then
-              echo "Stopping containers on port 8080: $PORT_CONFLICT"
               docker stop $PORT_CONFLICT
               docker rm $PORT_CONFLICT
             fi
 
-            # Удаляем контейнер spring-app, если есть
-            if docker ps -a --format '{{.Names}}' | grep -Eq "^spring-app\$"; then
-              echo "Removing old container spring-app"
-              docker stop spring-app || true
-              docker rm spring-app || true
-            fi
+            # Удаляем контейнер с именем java-app, если он остался
+            docker stop java-app || true
+            docker rm java-app || true
 
-            # Удаляем старый локальный образ
-            if docker images -q $IMAGE_NAME; then
-              echo "Removing old image $IMAGE_NAME"
-              docker rmi $IMAGE_NAME || true
-            fi
-
-            # Пуллим свежий образ
-            echo "Pulling image $IMAGE_NAME"
+            # Пуллим новый образ
             docker pull $IMAGE_NAME
 
-            # Запускаем новый контейнер
-            echo "Running new container spring-app"
-            docker run -d \
-              --name spring-app \
-              -p 8080:8080 \
-              $IMAGE_NAME
+            # Запускаем контейнер
+            docker run -d --name java-app -p 8080:8080 $IMAGE_NAME
