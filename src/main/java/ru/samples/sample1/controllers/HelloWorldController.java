@@ -12,8 +12,8 @@ public class HelloWorldController {
 		return 
 "<!DOCTYPE html>"+
 "<html>"+
-"	<head><title>do something</title></head>"+
-"	<body>Hello ortola, I am Java code!</body>"+
+"	<head><title>Hello World!</title></head>"+
+"	<body>Hello hartugul!!!</body>"+
 "</html>"
 			;
 	}
