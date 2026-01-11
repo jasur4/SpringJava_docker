@@ -13,7 +13,7 @@ public class HelloWorldController {
 "<!DOCTYPE html>"+
 "<html>"+
 "	<head><title>Hello World!</title></head>"+
-"	<body>Hello hartugul!!!</body>"+
+"	<body>Hello, I am Java Spring code!</body>"+
 "</html>"
 			;
 	}
